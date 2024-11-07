@@ -1,12 +1,14 @@
 import { test, expect } from '@jest/globals';
-import { cleanString, cleanObj, cleanLogs } from '../index';
+import { logCleaner } from '../index';
 
 import {
     mockMultiKeyStr, mockMultiKeyStrMasked, mockPasswordStr,
     mockPasswordStrMasked, mockSimpleObjWithHits, mockSimpleObjWithMask,
     mockSimpleMapWithHits, mockSimpleMapWithMask, mockComplexObjWithHits,
     mockComplexObjWithMask, mockComplexMapWithHits, mockComplexMapWithMask,
-    mockStringWithNoHit, mockObjWithNoHit, mockArrWithNoHit
+    mockStringWithNoHit, mockObjWithNoHit, mockArrWithNoHit, mockDictionaryOverride,
+    mockDictionaryOverrideStrHit, mockDictionaryOverrideStrMasked, mockDictionaryOverrideObjHit,
+    mockDictionaryOverrideObjMask
 } from './mockData'
 
 
@@ -14,114 +16,137 @@ describe('Confirm that cleanString() acts as expected', () => {
 
     test('Sending an empty string returns an empty string', () => {
         expect(
-            cleanString('')
+            logCleaner.cleanString('')
         ).toStrictEqual('');
-    })
+    });
 
 
     test('Sending string of just keyword password and a password masks the password', () => {
         expect(
-            cleanString(mockPasswordStr)
+            logCleaner.cleanString(mockPasswordStr)
         ).toStrictEqual(mockPasswordStrMasked);
-    })
+    });
 
     test('Sending string with multiple matches and varying case fixes all instances', () => {
         expect(
-            cleanString(mockMultiKeyStr)
+            logCleaner.cleanString(mockMultiKeyStr)
         ).toStrictEqual(mockMultiKeyStrMasked)
-    })
+    });
 
-})
+});
 
 describe('Confirm that cleanObj() acts as expected', () => {
 
     test('Sending an empty object returns an empty object', () => {
         expect(
-            cleanObj({})
+            logCleaner.cleanObj({})
         ).toStrictEqual({});
 
         expect(
-            cleanObj([])
+            logCleaner.cleanObj([])
         ).toStrictEqual([]);
 
         expect(
-            cleanObj(new Map())
+            logCleaner.cleanObj(new Map())
         ).toStrictEqual(new Map());
-    })
+    });
 
     test('Sending an object with a key in the dictionary, masks the value', () => {
         expect(
-            cleanObj(mockSimpleObjWithHits)
+            logCleaner.cleanObj(mockSimpleObjWithHits)
         ).toStrictEqual(mockSimpleObjWithMask)
 
         expect(
-            cleanObj(mockSimpleMapWithHits)
+            logCleaner.cleanObj(mockSimpleMapWithHits)
         ).toStrictEqual(mockSimpleMapWithMask);
-    })
+    });
 
     test('Sending an object with nested objects containing keys and strings with hits masks the value', () => {
         expect(
-            cleanObj(mockComplexObjWithHits)
+            logCleaner.cleanObj(mockComplexObjWithHits)
         ).toStrictEqual(mockComplexObjWithMask);
 
         expect(
-            cleanObj(mockComplexMapWithHits)
+            logCleaner.cleanObj(mockComplexMapWithHits)
         ).toStrictEqual(mockComplexMapWithMask);
-    })
-})
+    });
+});
 
 describe('Confirm that cleanLogs() acts as expected', () => {
 
     test('Send undefined receive undefined', () => {
         expect(
-            cleanLogs(undefined)
+            logCleaner.cleanLogs(undefined)
         ).toStrictEqual(undefined);
 
         expect(
-            cleanLogs()
+            logCleaner.cleanLogs()
         ).toStrictEqual(undefined);
-    })
+    });
 
     test('Send null receive null', () => {
         expect(
-            cleanLogs(null)
+            logCleaner.cleanLogs(null)
         ).toStrictEqual(null);
-    })
+    });
 
     test('Send one argument with no hits receive exact copy back', () => {
 
         expect(
-            cleanLogs(mockStringWithNoHit)
+            logCleaner.cleanLogs(mockStringWithNoHit)
         ).toStrictEqual(mockStringWithNoHit)
 
         expect(
-            cleanLogs(mockObjWithNoHit)
+            logCleaner.cleanLogs(mockObjWithNoHit)
         ).toEqual(mockObjWithNoHit)
 
         expect(
-            cleanLogs(mockArrWithNoHit)
+            logCleaner.cleanLogs(mockArrWithNoHit)
         ).toEqual(mockArrWithNoHit)
 
-    })
+    });
 
     test('Send one argument with hits receive mask back', () => {
 
         expect(
-            cleanLogs(mockSimpleObjWithHits)
+            logCleaner.cleanLogs(mockSimpleObjWithHits)
         ).toEqual(mockSimpleObjWithMask)
 
         expect(
-            cleanLogs(mockPasswordStr)
+            logCleaner.cleanLogs(mockPasswordStr)
         ).toEqual(mockPasswordStrMasked);
 
-    })
+    });
 
     test('Send multiple arguments with and without hits. Receive mask where fitting', () => {
-        let logArr = cleanLogs(mockMultiKeyStr, mockObjWithNoHit, mockStringWithNoHit);
+        let logArr = logCleaner.cleanLogs(mockMultiKeyStr, mockObjWithNoHit, mockStringWithNoHit);
         expect(logArr.length).toStrictEqual(3);
         expect(logArr[0]).toEqual(mockMultiKeyStrMasked);
         expect(logArr[1]).toEqual(mockObjWithNoHit);
         expect(logArr[2]).toEqual(mockStringWithNoHit);
-    })
+    });
+});
 
-})
+describe('Dictionary override works', () => {
+
+    test('importDictionary() works', () => {
+        try {
+            logCleaner.importDictionary(mockDictionaryOverride);
+        } catch (error: any) {
+            fail('importDictionary() threw an error')
+        }
+    });
+
+    test('Imported dictionary works with cleanString()', () => {
+        expect(
+            logCleaner.cleanString(mockDictionaryOverrideStrHit)
+        ).toStrictEqual(mockDictionaryOverrideStrMasked);
+    });
+
+    test('Imported dictionary works with cleanObj()', () => {
+        expect(
+            logCleaner.cleanObj(mockDictionaryOverrideObjHit)
+        ).toStrictEqual(mockDictionaryOverrideObjMask);
+    });
+
+});

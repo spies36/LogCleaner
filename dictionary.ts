@@ -1,22 +1,21 @@
-export const dictionary = new Map<string, boolean>([
-    ['pwd', true],
-    ['password', true],
-    ['ssn', true],
-    ['socialsecuritynumber', true],
-    ['token', true],
-    ['key', true]
+export const dictionary = new Set<string>([
+    'pwd',
+    'password',
+    'ssn',
+    'socialsecuritynumber',
+    'token',
+    'key',
+    'secret',
+    'creditcard',
+    'cvv',
+    'routingnumber',
+    'accountnumber',
+    'apikey',
+    'authtoken',
+    'secretkey',
+    'privatekey',
+    'code',
+    'cert',
+    'private_key',
+    'access_token'
 ])
-
-export function buildRegexFromDictionary(dict: Map<string, boolean>): RegExp {
-
-    let keyStr = '(('
-    for (let [key, val] of dict) {
-        keyStr += key + '|'
-    }
-    keyStr = keyStr.replace(/\|$/, ')');
-    keyStr += '[\\+\\-:\\s]+)([\\S]+)';
-
-    return new RegExp(keyStr, 'gi');
-}
-
-export const dictionaryAsRegex = buildRegexFromDictionary(dictionary);

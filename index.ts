@@ -1,69 +1,91 @@
-import { dictionaryAsRegex, dictionary } from './dictionary'
+import { dictionary } from './dictionary'
 
-function cleanString(str: string) {
-    return str.replaceAll(dictionaryAsRegex, '$1*****')
-}
+class LogCleaner {
 
+    private dictionary = dictionary;
 
-function cleanObj(obj: Record<any, any>) {
-    const isMap = (obj instanceof Map);
+    private dictionaryAsRegex;
 
-    if (isMap) {
-        for (const key of obj.keys()) {
-            if (dictionary.has(key)) {
-                obj.set(key, '*****');
-            } else {
-                const val = obj.get(key);
-                if (typeof val === 'object') {
-                    obj.set(key, cleanObj(val));
-                } else if (typeof val === 'string') {
-                    obj.set(key, cleanString(val));
+    constructor() {
+        this.dictionaryAsRegex = this.buildRegexFromDictionary(this.dictionary);
+    }
+
+    cleanString(str: string) {
+        return str.replaceAll(this.dictionaryAsRegex, '$1*****');
+    }
+
+    cleanObj(obj: Record<any, any>) {
+        const isMap = (obj instanceof Map);
+
+        if (isMap) {
+            for (const key of obj.keys()) {
+                if (this.dictionary.has(key)) {
+                    obj.set(key, '*****');
+                } else {
+                    const val = obj.get(key);
+                    if (typeof val === 'object') {
+                        obj.set(key, this.cleanObj(val));
+                    } else if (typeof val === 'string') {
+                        obj.set(key, this.cleanString(val));
+                    }
+                }
+            }
+        } else {
+            for (const key of Object.keys(obj)) {
+                if (this.dictionary.has(key) && typeof obj[key] !== 'function') {
+                    obj[key] = '*****';
+                } else {
+                    if (typeof obj[key] === 'object') {
+                        obj[key] === this.cleanObj(obj[key]);
+                    } else if (typeof obj[key] === 'string') {
+                        obj[key] = this.cleanString(obj[key]);
+                    }
                 }
             }
         }
-    } else {
-        for (const key of Object.keys(obj)) {
-            if (dictionary.has(key) && typeof obj[key] !== 'function') {
-                obj[key] = '*****';
-            } else {
-                if (typeof obj[key] === 'object') {
-                    obj[key] === cleanObj(obj[key]);
-                } else if (typeof obj[key] === 'string') {
-                    obj[key] = cleanString(obj[key]);
-                }
+
+        return obj;
+    }
+
+    cleanLogs<T extends any[]>(...args: T): T[] {
+        if (!args?.length) {
+            return args[0]
+        }
+
+        const cleanArgs: T[] = args.map((arg) => {
+
+            if (typeof arg === 'string') {
+                return this.cleanString(arg);
             }
-        }
+
+            if (typeof arg === 'object' && arg) {
+                let deepCopy = structuredClone(arg);
+                return this.cleanObj(deepCopy);
+            }
+
+            return arg;
+        })
+
+        return (cleanArgs.length <= 1 ? cleanArgs[0] : cleanArgs);
     }
 
-    return obj;
-}
-
-
-function cleanLogs<T extends any[]>(...args: T): T[] {
-    if (!args?.length) {
-        return args[0]
+    importDictionary(dictionary: string[]) {
+        this.dictionary = new Set(dictionary);
+        this.dictionaryAsRegex = this.buildRegexFromDictionary(this.dictionary);
     }
 
-    const cleanArgs: T[] = args.map((arg) => {
-
-        if (typeof arg === 'string') {
-            return cleanString(arg);
+    private buildRegexFromDictionary(dict: Set<string>): RegExp {
+        let keyStr = '(('
+        for (let key of dict) {
+            keyStr += key + '|';
         }
+        keyStr = keyStr.replace(/\|$/, ')');
+        keyStr += '[\\+\\-:=\\s]+)([\\S]+)';
 
-        if (typeof arg === 'object' && arg) {
-            let deepCopy = structuredClone(arg);
-            return cleanObj(deepCopy);
-        }
+        return new RegExp(keyStr, 'gi');
+    }
 
-        return arg
-    })
-
-
-    return (cleanArgs.length <= 1 ? cleanArgs[0] : cleanArgs)
 }
 
-export {
-    cleanLogs,
-    cleanString,
-    cleanObj
-}
+
+export const logCleaner = new LogCleaner();

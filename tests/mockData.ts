@@ -69,3 +69,19 @@ export const mockStringWithNoHit = 'Foo-Bar Foo:Bar Foo Bar 12345'
 export const mockObjWithNoHit = { foo: 'bar', bar: '12345' }
 
 export const mockArrWithNoHit = [1, 2, 4, 5, 'foo', 'bar']
+
+export const mockDictionaryOverride = ['myTestKeyword', 'MyExtraKeyWordTest']
+
+export const mockDictionaryOverrideStrHit = 'myTestKeyword - 12345 MyExtraKeyWordTest= ajlhkasdf';
+
+export const mockDictionaryOverrideStrMasked = 'myTestKeyword - ***** MyExtraKeyWordTest= *****';
+
+export const mockDictionaryOverrideObjHit = {
+    myTestKeyword: 12345,
+    foo: 'bar'
+}
+
+export const mockDictionaryOverrideObjMask = {
+    myTestKeyword: '*****',
+    foo: 'bar'
+}

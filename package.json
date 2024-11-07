@@ -1,10 +1,12 @@
 {
   "name": "logcleaner",
   "version": "1.0.0",
+  "description": "A powerful library designed to safeguard sensitive information within your logs. By effectively masking sensitive data like passwords, API keys, and SSNs, Log Cleaner ensures data privacy and security.",
   "main": "./dist/index.js",
   "types": "types.d.ts",
   "files": [
     "./dist/index.js",
+    "./dist/dictionary.js",
     "types.d.ts"
   ],
   "scripts": {
@@ -12,9 +14,19 @@
     "coverage": "jest --coverage --collectCoverageFrom=dist/index.js",
     "build": "tsc"
   },
-  "author": "",
+  "author": "Dylan Spies",
   "license": "ISC",
-  "description": "",
+  "homepage": "https://github.com/spies36/LogCleaner#readme",
+  "keywords": [
+    "Logs",
+    "scrubbing",
+    "masking",
+    "cleaner",
+    "HIIPA",
+    "PII",
+    "Credentials",
+    "Passwords"
+  ],
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
