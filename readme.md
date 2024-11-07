@@ -1,5 +1,7 @@
 # Log Cleaner
 
+[![LogCleaner Test](https://github.com/spies36/LogCleaner/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/spies36/LogCleaner/actions/workflows/test.yml)
+
 A powerful library designed to safeguard sensitive information within your logs. By effectively masking sensitive data like passwords, API keys, and SSNs, Log Cleaner ensures data privacy and security.
 
 ### Key Features
